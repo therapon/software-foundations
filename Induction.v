@@ -841,17 +841,18 @@ Fixpoint normalize (n: bin) : bin :=
 Theorem nat_plut_to_bin_double: forall n,
     nat_to_bin(n + n) = normalize (B0 (nat_to_bin n)).
 Proof.
-  intro n. induction n as [| n' IHn'].
-  - simpl. reflexivity.
-  - simpl.
+  (* intro n. induction n as [| n' IHn']. *)
+  (* - simpl. reflexivity. *)
+  (* - simpl. *)
+  Admitted.
 
 Theorem nat_2_bin_2_nat: forall n,
     nat_to_bin (bin_to_nat n) = normalize n.
-
 Proof.
-  induction n as [| b0 IHb0| b1 IHb1].
-  - simpl. reflexivity.
-  - simpl. rewrite <- plus_n_O.
+  (* induction n as [| b0 IHb0| b1 IHb1]. *)
+  (* - simpl. reflexivity. *)
+  (* - simpl. rewrite <- plus_n_O. *)
+  Admitted.
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_binary_inverse_c : option (nat*string) := None.
