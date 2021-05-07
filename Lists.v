@@ -858,34 +858,49 @@ Search (?x + ?y = ?y + ?x).
 Theorem app_nil_r : forall l : natlist,
   l ++ [] = l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intro l. induction l.
+  * reflexivity.
+  * simpl. rewrite IHl. reflexivity.   Qed.
+
 
 Theorem rev_app_distr: forall l1 l2 : natlist,
   rev (l1 ++ l2) = rev l2 ++ rev l1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l1 l2. induction l1.
+  * simpl. rewrite app_nil_r.  reflexivity.
+  * simpl. rewrite IHl1.  rewrite app_assoc. reflexivity.   Qed.
 
 Theorem rev_involutive : forall l : natlist,
   rev (rev l) = l.
 Proof.
-  (* FILL IN HERE *) Admitted.
-
-(** There is a short solution to the next one.  If you find yourself
+  intro l. induction l.
+  * reflexivity.
+  * simpl. rewrite rev_app_distr. rewrite IHl. simpl. reflexivity.
+Qed.
+    (** There is a short solution to the next one.  If you find yourself
     getting tangled up, step back and try to look for a simpler
     way. *)
 
 Theorem app_assoc4 : forall l1 l2 l3 l4 : natlist,
   l1 ++ (l2 ++ (l3 ++ l4)) = ((l1 ++ l2) ++ l3) ++ l4.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l1 l2l l3 l4.  induction l4.
+  * simpl. rewrite app_assoc. rewrite app_assoc. reflexivity.
+  * rewrite app_assoc. rewrite app_assoc. reflexivity.
+Qed.
 
 (** An exercise about your implementation of [nonzeros]: *)
 
 Lemma nonzeros_app : forall l1 l2 : natlist,
   nonzeros (l1 ++ l2) = (nonzeros l1) ++ (nonzeros l2).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros l1 l2. induction l1.
+  * simpl. reflexivity.
+  * simpl. induction n.
+    - simpl. rewrite IHl1. reflexivity.
+    - simpl. rewrite IHl1. reflexivity.
+Qed.
+    (** [] *)
 
 (** **** Exercise: 2 stars, standard (eqblist)
 
@@ -893,25 +908,37 @@ Proof.
     lists of numbers for equality.  Prove that [eqblist l l]
     yields [true] for every list [l]. *)
 
-Fixpoint eqblist (l1 l2 : natlist) : bool
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint eqblist (l1 l2 : natlist) : bool :=
+  match l1, l2 with
+  | nil, nil => true
+  | h1 :: t1, h2 :: t2 => if (h1 =? h2) then eqblist t1 t2
+                          else false
+  | _ , _ => false
+  end.
+
 
 Example test_eqblist1 :
   (eqblist nil nil = true).
- (* FILL IN HERE *) Admitted.
+Proof. reflexivity.   Qed.
 
 Example test_eqblist2 :
   eqblist [1;2;3] [1;2;3] = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity.   Qed.
 
 Example test_eqblist3 :
   eqblist [1;2;3] [1;2;4] = false.
- (* FILL IN HERE *) Admitted.
+Proof. reflexivity.   Qed.
 
 Theorem eqblist_refl : forall l:natlist,
   true = eqblist l l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intro l. induction l.
+  * simpl. reflexivity.
+  * simpl. induction n.
+    - simpl. rewrite IHl.  reflexivity.
+    - simpl. rewrite IHn. reflexivity.
+Qed.
+
 (** [] *)
 
 (* ================================================================= *)
@@ -924,7 +951,8 @@ Proof.
 Theorem count_member_nonzero : forall (s : bag),
   1 <=? (count 1 (1 :: s)) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intro s. reflexivity.   Qed.
+
 (** [] *)
 
 (** The following lemma about [leb] might help you in the next
@@ -945,7 +973,12 @@ Proof.
 Theorem remove_does_not_increase_count: forall (s : bag),
   (count 0 (remove_one 0 s)) <=? (count 0 s) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intro s. simpl. induction s.
+  * simpl. reflexivity.
+  * simpl. induction n.
+    - simpl. rewrite leb_n_Sn. reflexivity.
+    - simpl. rewrite IHs. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard, optional (bag_count_sum)
@@ -954,9 +987,27 @@ Proof.
     involving the functions [count] and [sum], and prove it using
     Coq.  (You may find that the difficulty of the proof depends on
     how you defined [count]!) *)
-(* FILL IN HERE
 
-    [] *)
+Theorem count_stable : forall s: bag, forall n: nat,
+      (count n s =? count n s) = true.
+Proof.
+  intros s n. induction s.
+  * simpl. reflexivity.
+  * simpl. destruct (n =? n0) eqn:If.
+    - simpl. rewrite IHs. reflexivity.
+    - simpl. rewrite IHs.  reflexivity.
+Qed.
+
+Theorem bag_count_sum : forall (s1 s2: bag), forall n: nat,
+    true = ((count n s1) + (count n s2) =? count n (sum s1 s2)).
+Proof.
+  intros s1 s2 n. induction s1.
+  * simpl. rewrite count_stable.  reflexivity.
+  * simpl. destruct (n =? n0) eqn:If.
+    - simpl. rewrite <- IHs1. reflexivity.
+    - simpl. rewrite <- IHs1.  reflexivity.
+Qed.
+
 
 (** **** Exercise: 4 stars, advanced (rev_injective)
 
@@ -966,7 +1017,8 @@ Proof.
 Theorem rev_injective : forall (l1 l2 : natlist),
     rev l1 = rev l2 -> l1 = l2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l1 l2.
+
 (** [] *)
 
 (* ################################################################# *)
